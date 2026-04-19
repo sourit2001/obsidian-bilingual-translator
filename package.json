@@ -1,0 +1,16 @@
+{
+  "name": "obsidian-bilingual-translator",
+  "version": "1.0.0",
+  "description": "Bilingual translation plugin for Obsidian",
+  "main": "main.js",
+  "scripts": {
+    "dev": "esbuild main.ts --bundle --external:obsidian --format=cjs --watch --outfile=main.js",
+    "build": "esbuild main.ts --bundle --external:obsidian --format=cjs --minify --outfile=main.js"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "esbuild": "0.17.11",
+    "obsidian": "latest",
+    "typescript": "4.9.5"
+  }
+}

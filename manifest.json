@@ -1,0 +1,10 @@
+{
+	"id": "obsidian-bilingual-translator",
+	"name": "Bilingual Translator",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Translate your English articles to Chinese in a bilingual format using LLMs.",
+	"author": "Antigravity",
+	"authorUrl": "https://github.com/antigravity",
+	"isDesktopOnly": false
+}
