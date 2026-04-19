@@ -1,7 +1,6 @@
 import {
 	App,
 	Editor,
-	MarkdownView,
 	Notice,
 	Plugin,
 	PluginSettingTab,
@@ -48,7 +47,7 @@ const DEFAULT_SETTINGS: TranslatorSettings = {
 // ─── Translation prompt ───────────────────────────────────────────────────────
 
 const BILINGUAL_PROMPT = (text: string) =>
-	`You are a professional English-to-Chinese translator. Your task is to translate the following Markdown article.
+	`Translate the following and provide bilingual version.
 
 Rules:
 1. Output in BILINGUAL format: for each paragraph, output the original English paragraph first, then its Chinese translation on the next line, separated by a blank line.
@@ -105,36 +104,17 @@ export default class BilingualTranslator extends Plugin {
 
 		this.addCommand({
 			id: 'translate-note-bilingual',
-			name: 'Translate current note → Bilingual (中英对照)',
+			name: 'Translate note → bilingual (中英对照)',
 			editorCallback: async (editor: Editor) => {
-				const original = editor.getValue();
-				if (!original.trim()) {
-					new Notice('⚠️ Note is empty.');
-					return;
-				}
-				await this.runTranslation(editor, original);
+				await this.translateAll(editor);
 			},
 		});
 
 		this.addCommand({
 			id: 'translate-selection-bilingual',
-			name: 'Translate selection → Bilingual (中英对照)',
+			name: 'Translate selection → bilingual (中英对照)',
 			editorCallback: async (editor: Editor) => {
-				const selected = editor.getSelection();
-				if (!selected.trim()) {
-					new Notice('⚠️ No text selected.');
-					return;
-				}
-				const notice = new Notice('🔄 Translating selection...', 0);
-				try {
-					const translated = await this.translateText(selected);
-					editor.replaceSelection(translated);
-					notice.hide();
-					new Notice('✅ Selection translated!');
-				} catch (e) {
-					notice.hide();
-					new Notice('❌ Translation failed: ' + (e as Error).message);
-				}
+				await this.translateSelection(editor);
 			},
 		});
 
@@ -144,12 +124,10 @@ export default class BilingualTranslator extends Plugin {
 			this.app.workspace.on('editor-menu', (menu, editor) => {
 				menu.addItem((item) => {
 					item
-						.setTitle('Translate note → Bilingual')
-						.setIcon('translate')
+						.setTitle('Translate note → bilingual (中英对照)')
+						.setIcon('languages')
 						.onClick(async () => {
-							const original = editor.getValue();
-							if (!original.trim()) return;
-							await this.runTranslation(editor, original);
+							await this.translateAll(editor);
 						});
 				});
 
@@ -157,19 +135,10 @@ export default class BilingualTranslator extends Plugin {
 				if (selection.trim()) {
 					menu.addItem((item) => {
 						item
-							.setTitle('Translate selection → Bilingual')
-							.setIcon('translate')
+							.setTitle('Translate selection → bilingual (中英对照)')
+							.setIcon('languages')
 							.onClick(async () => {
-								const notice = new Notice('🔄 Translating selection...', 0);
-								try {
-									const translated = await this.translateText(selection);
-									editor.replaceSelection(translated);
-									notice.hide();
-									new Notice('✅ Selection translated!');
-								} catch (e) {
-									notice.hide();
-									new Notice('❌ Translation failed: ' + (e as Error).message);
-								}
+								await this.translateSelection(editor);
 							});
 					});
 				}
@@ -177,28 +146,55 @@ export default class BilingualTranslator extends Plugin {
 		);
 	}
 
+	async translateAll(editor: Editor) {
+		const text = editor.getValue();
+		if (!text.trim()) {
+			new Notice('Note is empty.');
+			return;
+		}
+		await this.runTranslation(editor, text);
+	}
+
+	async translateSelection(editor: Editor) {
+		const selected = editor.getSelection();
+		if (!selected.trim()) {
+			new Notice('No text selected.');
+			return;
+		}
+		const notice = new Notice('Translating selection...', 0);
+		try {
+			const translated = await this.translateText(selected);
+			editor.replaceSelection(translated);
+			notice.hide();
+			new Notice('Selection translated!');
+		} catch (e) {
+			notice.hide();
+			new Notice('Translation failed: ' + (e as Error).message);
+		}
+	}
+
 	async runTranslation(editor: Editor, fullText: string) {
 		const { frontmatter, body } = extractFrontmatter(fullText);
 		const chunks = chunkText(body, this.settings.chunkSize);
 		const total = chunks.length;
-		const notice = new Notice(`🔄 Translating… (0 / ${total} chunks)`, 0);
+		const notice = new Notice(`Translating… (0 / ${total} chunks)`, 0);
 
 		const translated: string[] = [];
 		for (let i = 0; i < chunks.length; i++) {
-			notice.setMessage(`🔄 Translating… (${i + 1} / ${total} chunks)`);
+			notice.setMessage(`Translating… (${i + 1} / ${total} chunks)`);
 			try {
 				const result = await this.translateText(chunks[i]);
 				translated.push(result);
 			} catch (e) {
 				notice.hide();
-				new Notice('❌ Translation failed: ' + (e as Error).message);
+				new Notice('Translation failed: ' + (e as Error).message);
 				return;
 			}
 		}
 
 		notice.hide();
 		editor.setValue(frontmatter + translated.join('\n\n'));
-		new Notice('✅ Translation complete!');
+		new Notice('Translation complete!');
 	}
 
 	async translateText(text: string): Promise<string> {
@@ -334,18 +330,18 @@ class TranslatorSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: '🌐 Bilingual Translator' });
+		containerEl.createEl('h2', { text: 'Bilingual translator' });
 
 		new Setting(containerEl)
 			.setName('Engine')
 			.setDesc('Select the translation engine.')
 			.addDropdown((drop) =>
 				drop
-					.addOption('deepseek', '🚀 DeepSeek')
-					.addOption('gemini', '♊ Google Gemini')
-					.addOption('minimax', '🪐 MiniMax')
-					.addOption('openai', '🤖 OpenAI-compatible')
-					.addOption('microsoft', '🆓 Microsoft Translator')
+					.addOption('deepseek', 'DeepSeek')
+					.addOption('gemini', 'Google Gemini')
+					.addOption('minimax', 'MiniMax')
+					.addOption('openai', 'OpenAI-compatible')
+					.addOption('microsoft', 'Microsoft Translator')
 					.setValue(this.plugin.settings.engine)
 					.onChange(async (value) => {
 						this.plugin.settings.engine = value as EngineType;
@@ -354,31 +350,32 @@ class TranslatorSettingTab extends PluginSettingTab {
 					})
 			);
 
-		if (this.plugin.settings.engine === 'deepseek') {
-			new Setting(containerEl)
-				.setName('DeepSeek API Key')
-				.addText((text) =>
-					text.setValue(this.plugin.settings.deepseekApiKey).onChange(async (v) => {
-						this.plugin.settings.deepseekApiKey = v.trim();
+		new Setting(containerEl).setName('DeepSeek settings').setHeading();
+
+		new Setting(containerEl)
+			.setName('DeepSeek API key')
+			.addText((text) =>
+				text.setValue(this.plugin.settings.deepseekApiKey).onChange(async (v) => {
+					this.plugin.settings.deepseekApiKey = v.trim();
+					await this.plugin.saveSettings();
+				})
+			);
+		new Setting(containerEl)
+			.setName('DeepSeek model')
+			.addText((text) =>
+				text
+					.setPlaceholder('deepseek-chat')
+					.setValue(this.plugin.settings.deepseekModel)
+					.onChange(async (v) => {
+						this.plugin.settings.deepseekModel = v.trim();
 						await this.plugin.saveSettings();
 					})
-				);
-			new Setting(containerEl)
-				.setName('DeepSeek Model')
-				.addText((text) =>
-					text
-						.setPlaceholder('deepseek-chat')
-						.setValue(this.plugin.settings.deepseekModel)
-						.onChange(async (v) => {
-							this.plugin.settings.deepseekModel = v.trim();
-							await this.plugin.saveSettings();
-						})
-				);
-		}
+			);
 
 		if (this.plugin.settings.engine === 'gemini') {
+			new Setting(containerEl).setName('Gemini settings').setHeading();
 			new Setting(containerEl)
-				.setName('Gemini API Key')
+				.setName('Gemini API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiApiKey).onChange(async (v) => {
 						this.plugin.settings.geminiApiKey = v.trim();
@@ -386,7 +383,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 					})
 				);
 			new Setting(containerEl)
-				.setName('Gemini Model')
+				.setName('Gemini model')
 				.setDesc('e.g. gemini-1.5-flash-8b')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiModel).onChange(async (v) => {
@@ -397,8 +394,9 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'minimax') {
+			new Setting(containerEl).setName('MiniMax settings').setHeading();
 			new Setting(containerEl)
-				.setName('MiniMax API Key')
+				.setName('MiniMax API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxApiKey).onChange(async (v) => {
 						this.plugin.settings.minimaxApiKey = v.trim();
@@ -406,7 +404,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 					})
 				);
 			new Setting(containerEl)
-				.setName('MiniMax Model')
+				.setName('MiniMax model')
 				.setDesc('e.g. MiniMax-M2.7')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxModel).onChange(async (v) => {
@@ -417,8 +415,9 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'openai') {
+			new Setting(containerEl).setName('OpenAI settings').setHeading();
 			new Setting(containerEl)
-				.setName('API Key')
+				.setName('API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.openaiApiKey).onChange(async (v) => {
 						this.plugin.settings.openaiApiKey = v.trim();
@@ -444,8 +443,9 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'microsoft') {
+			new Setting(containerEl).setName('Microsoft settings').setHeading();
 			new Setting(containerEl)
-				.setName('API Key')
+				.setName('API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.microsoftApiKey).onChange(async (v) => {
 						this.plugin.settings.microsoftApiKey = v.trim();
@@ -462,17 +462,18 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 		}
 
+		new Setting(containerEl).setName('Advanced settings').setHeading();
 		new Setting(containerEl)
-			.setName('Chunk size')
-			.setDesc('Characters per translation batch.')
-			.addSlider((slider) =>
-				slider
-					.setLimits(500, 6000, 500)
-					.setValue(this.plugin.settings.chunkSize)
-					.onChange(async (v) => {
-						this.plugin.settings.chunkSize = v;
+			.setName('Translation chunk size')
+			.setDesc('Max characters per translation request (default 2000).')
+			.addText((text) =>
+				text.setValue(String(this.plugin.settings.chunkSize)).onChange(async (v) => {
+					const num = parseInt(v);
+					if (!isNaN(num)) {
+						this.plugin.settings.chunkSize = num;
 						await this.plugin.saveSettings();
-					})
+					}
+				})
 			);
 	}
 }
