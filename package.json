@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-bilingual-translator",
+  "name": "bilingual-translator",
   "version": "1.0.0",
   "description": "Bilingual translation plugin for Obsidian",
   "main": "main.js",

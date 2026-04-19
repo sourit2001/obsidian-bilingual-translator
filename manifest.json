@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-bilingual-translator",
+	"id": "bilingual-translator",
 	"name": "Bilingual Translator",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Translate your English articles to Chinese in a bilingual format using LLMs.",
+	"description": "Translate English articles to Chinese in a bilingual format using LLMs (Gemini 3.1, MiniMax, DeepSeek).",
 	"author": "Antigravity",
 	"authorUrl": "https://github.com/antigravity",
 	"isDesktopOnly": false
