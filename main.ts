@@ -330,7 +330,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: 'Bilingual translator' });
+		new Setting(containerEl).setName('Bilingual translator').setHeading();
 
 		new Setting(containerEl)
 			.setName('Engine')
@@ -341,7 +341,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 					.addOption('gemini', 'Google Gemini')
 					.addOption('minimax', 'MiniMax')
 					.addOption('openai', 'OpenAI-compatible')
-					.addOption('microsoft', 'Microsoft Translator')
+					.addOption('microsoft', 'Microsoft translator')
 					.setValue(this.plugin.settings.engine)
 					.onChange(async (value) => {
 						this.plugin.settings.engine = value as EngineType;
@@ -350,7 +350,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl).setName('DeepSeek settings').setHeading();
+		new Setting(containerEl).setName('DeepSeek').setHeading();
 
 		new Setting(containerEl)
 			.setName('DeepSeek API key')
@@ -373,7 +373,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 			);
 
 		if (this.plugin.settings.engine === 'gemini') {
-			new Setting(containerEl).setName('Gemini settings').setHeading();
+			new Setting(containerEl).setName('Gemini').setHeading();
 			new Setting(containerEl)
 				.setName('Gemini API key')
 				.addText((text) =>
@@ -394,7 +394,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'minimax') {
-			new Setting(containerEl).setName('MiniMax settings').setHeading();
+			new Setting(containerEl).setName('MiniMax').setHeading();
 			new Setting(containerEl)
 				.setName('MiniMax API key')
 				.addText((text) =>
@@ -415,7 +415,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'openai') {
-			new Setting(containerEl).setName('OpenAI settings').setHeading();
+			new Setting(containerEl).setName('OpenAI-compatible').setHeading();
 			new Setting(containerEl)
 				.setName('API key')
 				.addText((text) =>
@@ -443,7 +443,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'microsoft') {
-			new Setting(containerEl).setName('Microsoft settings').setHeading();
+			new Setting(containerEl).setName('Microsoft translator').setHeading();
 			new Setting(containerEl)
 				.setName('API key')
 				.addText((text) =>
@@ -462,7 +462,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 		}
 
-		new Setting(containerEl).setName('Advanced settings').setHeading();
+		new Setting(containerEl).setName('Advanced').setHeading();
 		new Setting(containerEl)
 			.setName('Translation chunk size')
 			.setDesc('Max characters per translation request (default 2000).')
