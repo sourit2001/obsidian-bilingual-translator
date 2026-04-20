@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Translate English articles to Chinese in a bilingual format using LLMs (Gemini 3.1, MiniMax, DeepSeek).",
-	"author": "Antigravity",
-	"authorUrl": "https://github.com/antigravity",
+	"author": "sourit2001",
+	"authorUrl": "https://github.com/sourit2001/obsidian-bilingual-translator",
 	"isDesktopOnly": false
 }

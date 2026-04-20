@@ -1,6 +1,7 @@
 import {
 	App,
 	Editor,
+	MarkdownView,
 	Notice,
 	Plugin,
 	PluginSettingTab,
@@ -116,6 +117,16 @@ export default class BilingualTranslator extends Plugin {
 			editorCallback: async (editor: Editor) => {
 				await this.translateSelection(editor);
 			},
+		});
+
+		// Add ribbon icon for easy access (especially on mobile)
+		this.addRibbonIcon('languages', 'Translate note → bilingual', async () => {
+			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (view) {
+				await this.translateAll(view.editor);
+			} else {
+				new Notice('Please open a markdown note first');
+			}
 		});
 
 		this.addSettingTab(new TranslatorSettingTab(this.app, this));
