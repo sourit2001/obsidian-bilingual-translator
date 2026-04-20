@@ -104,7 +104,7 @@ export default class BilingualTranslator extends Plugin {
 
 		this.addCommand({
 			id: 'translate-note-bilingual',
-			name: 'Translate note → bilingual (中英对照)',
+			name: 'Translate note → bilingual parallel (中英对照)',
 			editorCallback: async (editor: Editor) => {
 				await this.translateAll(editor);
 			},
@@ -112,7 +112,7 @@ export default class BilingualTranslator extends Plugin {
 
 		this.addCommand({
 			id: 'translate-selection-bilingual',
-			name: 'Translate selection → bilingual (中英对照)',
+			name: 'Translate selection → bilingual parallel (中英对照)',
 			editorCallback: async (editor: Editor) => {
 				await this.translateSelection(editor);
 			},
@@ -124,7 +124,7 @@ export default class BilingualTranslator extends Plugin {
 			this.app.workspace.on('editor-menu', (menu, editor) => {
 				menu.addItem((item) => {
 					item
-						.setTitle('Translate note → bilingual (中英对照)')
+						.setTitle('Translate note → bilingual parallel (中英对照)')
 						.setIcon('languages')
 						.onClick(async () => {
 							await this.translateAll(editor);
@@ -135,7 +135,7 @@ export default class BilingualTranslator extends Plugin {
 				if (selection.trim()) {
 					menu.addItem((item) => {
 						item
-							.setTitle('Translate selection → bilingual (中英对照)')
+							.setTitle('Translate selection → bilingual parallel (中英对照)')
 							.setIcon('languages')
 							.onClick(async () => {
 								await this.translateSelection(editor);
@@ -330,11 +330,11 @@ class TranslatorSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		new Setting(containerEl).setName('Bilingual translator').setHeading();
+		new Setting(containerEl).setName('Translation settings').setHeading();
 
 		new Setting(containerEl)
 			.setName('Engine')
-			.setDesc('Select the translation engine.')
+			.setDesc('Select the translation engine')
 			.addDropdown((drop) =>
 				drop
 					.addOption('deepseek', 'DeepSeek')
@@ -376,6 +376,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 			new Setting(containerEl).setName('Gemini').setHeading();
 			new Setting(containerEl)
 				.setName('Gemini API key')
+				.setDesc('Enter your Google Gemini API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiApiKey).onChange(async (v) => {
 						this.plugin.settings.geminiApiKey = v.trim();
@@ -397,6 +398,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 			new Setting(containerEl).setName('MiniMax').setHeading();
 			new Setting(containerEl)
 				.setName('MiniMax API key')
+				.setDesc('Enter your MiniMax API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxApiKey).onChange(async (v) => {
 						this.plugin.settings.minimaxApiKey = v.trim();
@@ -465,7 +467,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName('Advanced').setHeading();
 		new Setting(containerEl)
 			.setName('Translation chunk size')
-			.setDesc('Max characters per translation request (default 2000).')
+			.setDesc('Max characters per translation request')
 			.addText((text) =>
 				text.setValue(String(this.plugin.settings.chunkSize)).onChange(async (v) => {
 					const num = parseInt(v);
