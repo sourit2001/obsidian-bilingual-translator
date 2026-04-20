@@ -330,16 +330,16 @@ class TranslatorSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		new Setting(containerEl).setName('Translation settings').setHeading();
+		new Setting(containerEl).setName('General').setHeading();
 
 		new Setting(containerEl)
 			.setName('Engine')
 			.setDesc('Select the translation engine')
 			.addDropdown((drop) =>
 				drop
-					.addOption('deepseek', 'DeepSeek')
-					.addOption('gemini', 'Google Gemini')
-					.addOption('minimax', 'MiniMax')
+					.addOption('deepseek', 'Deepseek')
+					.addOption('gemini', 'Google gemini')
+					.addOption('minimax', 'Minimax')
 					.addOption('openai', 'OpenAI-compatible')
 					.addOption('microsoft', 'Microsoft translator')
 					.setValue(this.plugin.settings.engine)
@@ -350,10 +350,10 @@ class TranslatorSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl).setName('DeepSeek').setHeading();
+		new Setting(containerEl).setName('Deepseek').setHeading();
 
 		new Setting(containerEl)
-			.setName('DeepSeek API key')
+			.setName('Deepseek API key')
 			.addText((text) =>
 				text.setValue(this.plugin.settings.deepseekApiKey).onChange(async (v) => {
 					this.plugin.settings.deepseekApiKey = v.trim();
@@ -361,7 +361,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				})
 			);
 		new Setting(containerEl)
-			.setName('DeepSeek model')
+			.setName('Deepseek model')
 			.addText((text) =>
 				text
 					.setPlaceholder('deepseek-chat')
@@ -376,7 +376,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 			new Setting(containerEl).setName('Gemini').setHeading();
 			new Setting(containerEl)
 				.setName('Gemini API key')
-				.setDesc('Enter your Google Gemini API key')
+				.setDesc('Enter your Google gemini API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiApiKey).onChange(async (v) => {
 						this.plugin.settings.geminiApiKey = v.trim();
@@ -395,10 +395,10 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'minimax') {
-			new Setting(containerEl).setName('MiniMax').setHeading();
+			new Setting(containerEl).setName('Minimax').setHeading();
 			new Setting(containerEl)
-				.setName('MiniMax API key')
-				.setDesc('Enter your MiniMax API key')
+				.setName('Minimax API key')
+				.setDesc('Enter your Minimax API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxApiKey).onChange(async (v) => {
 						this.plugin.settings.minimaxApiKey = v.trim();
@@ -406,7 +406,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 					})
 				);
 			new Setting(containerEl)
-				.setName('MiniMax model')
+				.setName('Minimax model')
 				.setDesc('e.g. MiniMax-M2.7')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxModel).onChange(async (v) => {
@@ -417,7 +417,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'openai') {
-			new Setting(containerEl).setName('OpenAI-compatible').setHeading();
+			new Setting(containerEl).setName('OpenAI compatible').setHeading();
 			new Setting(containerEl)
 				.setName('API key')
 				.addText((text) =>
