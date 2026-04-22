@@ -48,14 +48,14 @@ const DEFAULT_SETTINGS: TranslatorSettings = {
 // ─── Translation prompt ───────────────────────────────────────────────────────
 
 const BILINGUAL_PROMPT = (text: string) =>
-	`Translate the following and provide bilingual version.
+	`You are a translator. Translate the following text. If the text is in English, translate it into Chinese. If the text is in Chinese, translate it into English. Keep the original text and provide the translation below. Do not add any other content or explanations.
 
 Rules:
-1. Output in BILINGUAL format: for each paragraph, output the original English paragraph first, then its Chinese translation on the next line, separated by a blank line.
-2. For headings: output the original heading line, then the translated heading on the next line (same heading level, e.g. ## 原文标题).
+1. Output in BILINGUAL format: for each paragraph, output the original paragraph first, then its translation on the next line, separated by a blank line.
+2. For headings: output the original heading line, then the translated heading on the next line (same heading level).
 3. Do NOT translate: code blocks (fenced with \`\`\`), inline code, URLs, file paths, YAML frontmatter, or Obsidian wiki-links [[...]].
 4. Keep all Markdown syntax (bold, italic, lists, links) intact.
-5. The translation should sound natural in Chinese. Do not translate word-for-word.
+5. The translation should sound natural. Do not translate word-for-word.
 
 Article to translate:
 ---
@@ -105,7 +105,7 @@ export default class BilingualTranslator extends Plugin {
 
 		this.addCommand({
 			id: 'translate-note-bilingual',
-			name: 'Translate note → bilingual parallel (中英对照)',
+			name: 'Translate note (bilingual parallel)',
 			editorCallback: async (editor: Editor) => {
 				await this.translateAll(editor);
 			},
@@ -113,7 +113,7 @@ export default class BilingualTranslator extends Plugin {
 
 		this.addCommand({
 			id: 'translate-selection-bilingual',
-			name: 'Translate selection → bilingual parallel (中英对照)',
+			name: 'Translate selection (bilingual parallel)',
 			editorCallback: async (editor: Editor) => {
 				await this.translateSelection(editor);
 			},
@@ -135,7 +135,7 @@ export default class BilingualTranslator extends Plugin {
 			this.app.workspace.on('editor-menu', (menu, editor) => {
 				menu.addItem((item) => {
 					item
-						.setTitle('Translate note → bilingual parallel (中英对照)')
+						.setTitle('Translate note (bilingual parallel)')
 						.setIcon('languages')
 						.onClick(async () => {
 							await this.translateAll(editor);
@@ -146,7 +146,7 @@ export default class BilingualTranslator extends Plugin {
 				if (selection.trim()) {
 					menu.addItem((item) => {
 						item
-							.setTitle('Translate selection → bilingual parallel (中英对照)')
+							.setTitle('Translate selection (bilingual parallel)')
 							.setIcon('languages')
 							.onClick(async () => {
 								await this.translateSelection(editor);
@@ -160,7 +160,7 @@ export default class BilingualTranslator extends Plugin {
 	async translateAll(editor: Editor) {
 		const text = editor.getValue();
 		if (!text.trim()) {
-			new Notice('Note is empty.');
+			new Notice('Note is empty');
 			return;
 		}
 		await this.runTranslation(editor, text);
@@ -169,15 +169,15 @@ export default class BilingualTranslator extends Plugin {
 	async translateSelection(editor: Editor) {
 		const selected = editor.getSelection();
 		if (!selected.trim()) {
-			new Notice('No text selected.');
+			new Notice('No text selected');
 			return;
 		}
-		const notice = new Notice('Translating selection...', 0);
+		const notice = new Notice('Translating selection', 0);
 		try {
 			const translated = await this.translateText(selected);
 			editor.replaceSelection(translated);
 			notice.hide();
-			new Notice('Selection translated!');
+			new Notice('Selection translated');
 		} catch (e) {
 			notice.hide();
 			new Notice('Translation failed: ' + (e as Error).message);
@@ -188,11 +188,11 @@ export default class BilingualTranslator extends Plugin {
 		const { frontmatter, body } = extractFrontmatter(fullText);
 		const chunks = chunkText(body, this.settings.chunkSize);
 		const total = chunks.length;
-		const notice = new Notice(`Translating… (0 / ${total} chunks)`, 0);
+		const notice = new Notice(`Translating (0 / ${total} chunks)`, 0);
 
 		const translated: string[] = [];
 		for (let i = 0; i < chunks.length; i++) {
-			notice.setMessage(`Translating… (${i + 1} / ${total} chunks)`);
+			notice.setMessage(`Translating (${i + 1} / ${total} chunks)`);
 			try {
 				const result = await this.translateText(chunks[i]);
 				translated.push(result);
@@ -205,7 +205,7 @@ export default class BilingualTranslator extends Plugin {
 
 		notice.hide();
 		editor.setValue(frontmatter + translated.join('\n\n'));
-		new Notice('Translation complete!');
+		new Notice('Translation complete');
 	}
 
 	async translateText(text: string): Promise<string> {
@@ -344,15 +344,15 @@ class TranslatorSettingTab extends PluginSettingTab {
 		// No heading here to satisfy reviewer
 
 		new Setting(containerEl)
-			.setName('Engine')
-			.setDesc('Select the translation engine')
+			.setName('Translation engine')
+			.setDesc('Select translation engine')
 			.addDropdown((drop) =>
 				drop
 					.addOption('deepseek', 'Deepseek')
-					.addOption('gemini', 'Google gemini')
+					.addOption('gemini', 'Google Gemini')
 					.addOption('minimax', 'Minimax')
-					.addOption('openai', 'Openai compatible')
-					.addOption('microsoft', 'Microsoft translator')
+					.addOption('openai', 'OpenAI compatible')
+					.addOption('microsoft', 'Microsoft Translator')
 					.setValue(this.plugin.settings.engine)
 					.onChange(async (value) => {
 						this.plugin.settings.engine = value as EngineType;
@@ -364,7 +364,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName('Deepseek').setHeading();
 
 		new Setting(containerEl)
-			.setName('Deepseek API key')
+			.setName('Deepseek api key')
 			.addText((text) =>
 				text.setValue(this.plugin.settings.deepseekApiKey).onChange(async (v) => {
 					this.plugin.settings.deepseekApiKey = v.trim();
@@ -375,7 +375,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 			.setName('Deepseek model')
 			.addText((text) =>
 				text
-					.setPlaceholder('deepseek-chat')
+					.setPlaceholder('Enter model id')
 					.setValue(this.plugin.settings.deepseekModel)
 					.onChange(async (v) => {
 						this.plugin.settings.deepseekModel = v.trim();
@@ -384,10 +384,10 @@ class TranslatorSettingTab extends PluginSettingTab {
 			);
 
 		if (this.plugin.settings.engine === 'gemini') {
-			new Setting(containerEl).setName('Gemini').setHeading();
+			new Setting(containerEl).setName('Google Gemini').setHeading();
 			new Setting(containerEl)
-				.setName('Gemini API key')
-				.setDesc('Enter your Google gemini API key')
+				.setName('Gemini api key')
+				.setDesc('Enter Google Gemini api key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiApiKey).onChange(async (v) => {
 						this.plugin.settings.geminiApiKey = v.trim();
@@ -396,7 +396,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Gemini model')
-				.setDesc('e.g. gemini-1.5-flash-8b')
+				.setDesc('Enter model id')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiModel).onChange(async (v) => {
 						this.plugin.settings.geminiModel = v.trim();
@@ -408,8 +408,8 @@ class TranslatorSettingTab extends PluginSettingTab {
 		if (this.plugin.settings.engine === 'minimax') {
 			new Setting(containerEl).setName('Minimax').setHeading();
 			new Setting(containerEl)
-				.setName('Minimax API key')
-				.setDesc('Enter your Minimax API key')
+				.setName('Minimax api key')
+				.setDesc('Enter Minimax api key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxApiKey).onChange(async (v) => {
 						this.plugin.settings.minimaxApiKey = v.trim();
@@ -418,7 +418,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Minimax model')
-				.setDesc('e.g. MiniMax-M2.7')
+				.setDesc('Enter model id')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxModel).onChange(async (v) => {
 						this.plugin.settings.minimaxModel = v.trim();
@@ -428,7 +428,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'openai') {
-			new Setting(containerEl).setName('Openai compatible').setHeading();
+			new Setting(containerEl).setName('OpenAI compatible').setHeading();
 			new Setting(containerEl)
 				.setName('Api key')
 				.addText((text) =>
@@ -442,7 +442,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				.setDesc('Custom api endpoint url')
 				.addText((text) =>
 					text
-						.setPlaceholder('https://api.openai.com/v1')
+						.setPlaceholder('Enter api base url')
 						.setValue(this.plugin.settings.openaiBaseUrl)
 						.onChange(async (v) => {
 							this.plugin.settings.openaiBaseUrl = v.trim();
@@ -463,9 +463,9 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'microsoft') {
-			new Setting(containerEl).setName('Microsoft translator').setHeading();
+			new Setting(containerEl).setName('Microsoft Translator').setHeading();
 			new Setting(containerEl)
-				.setName('API key')
+				.setName('Api key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.microsoftApiKey).onChange(async (v) => {
 						this.plugin.settings.microsoftApiKey = v.trim();
@@ -474,6 +474,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Region')
+				.setDesc('Enter Microsoft Translator region')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.microsoftRegion).onChange(async (v) => {
 						this.plugin.settings.microsoftRegion = v.trim();
@@ -485,7 +486,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName('Advanced').setHeading();
 		new Setting(containerEl)
 			.setName('Translation chunk size')
-			.setDesc('Max characters per translation request')
+			.setDesc('Maximum characters per translation request')
 			.addText((text) =>
 				text.setValue(String(this.plugin.settings.chunkSize)).onChange(async (v) => {
 					const num = parseInt(v);

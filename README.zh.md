@@ -34,8 +34,8 @@ English | 中文版
 - **MiniMax**: [前往注册](https://platform.minimaxi.com/)
 
 ### 3. 如何使用
-- **全篇翻译**: 在英文笔记中点击右键 -> `Translate note → Bilingual`。
-- **选中翻译**: 选中文本段落 -> 右键 -> `Translate selection → Bilingual`。
+- **全篇翻译**: 在英文笔记中点击右键 -> `Translate note (bilingual parallel)`。
+- **选中翻译**: 选中文本段落 -> 右键 -> `Translate selection (bilingual parallel)`。
 - **命令面板**: 按 `Cmd + P` 搜索 `Bilingual Translator` 相关命令。
 
 ## 🛠️ 开发者编译

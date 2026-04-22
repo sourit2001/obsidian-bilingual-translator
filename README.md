@@ -34,8 +34,8 @@ Go to Obsidian **Settings** -> **Bilingual Translator** and set up your preferre
 - **MiniMax**: Get your key at [MiniMax Open Platform](https://platform.minimaxi.com/).
 
 ### 3. Usage
-- **Option A**: Right-click anywhere in an English note -> `Translate note → Bilingual`.
-- **Option B**: Highlight a paragraph -> Right-click -> `Translate selection → Bilingual`.
+- **Option A**: Right-click anywhere in an English note -> `Translate note (bilingual parallel)`.
+- **Option B**: Highlight a paragraph -> Right-click -> `Translate selection (bilingual parallel)`.
 - **Option C**: Use Command Palette (`Cmd + P`) -> Search `Bilingual Translator`.
 
 ## 🛠️ Build from Source
