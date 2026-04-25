@@ -9,7 +9,7 @@ import {
 	requestUrl,
 } from 'obsidian';
 
-// ─── Settings ────────────────────────────────────────────────────────────────
+// ─── Settings ──────────────────────────────────────────────────────────[...]
 
 type EngineType = 'deepseek' | 'openai' | 'microsoft' | 'gemini' | 'minimax';
 
@@ -45,15 +45,15 @@ const DEFAULT_SETTINGS: TranslatorSettings = {
 	chunkSize: 2000,
 };
 
-// ─── Translation prompt ───────────────────────────────────────────────────────
+// ─── Translation prompt ────────────────────────────────────────────────────────[...]
 
 const BILINGUAL_PROMPT = (text: string) =>
-	`You are a translator. Translate the following text. If the text is in English, translate it into Chinese. If the text is in Chinese, translate it into English. Keep the original text and provide the translation below. Do not add any other content or explanations.
+	`You are a translator. Translate the following text. If the text is in English, translate it into Chinese. If the text is in Chinese, translate it into English. Keep the original text and provide[...]
 
 Rules:
 1. Output in BILINGUAL format: for each paragraph, output the original paragraph first, then its translation on the next line, separated by a blank line.
 2. For headings: output the original heading line, then the translated heading on the next line (same heading level).
-3. Do NOT translate: code blocks (fenced with \`\`\`), inline code, URLs, file paths, YAML frontmatter, or Obsidian wiki-links [[...]].
+3. Do NOT translate: code blocks (fenced with \`\`\`), inline code, URLs, file paths, YAML frontmatter, or Obsidian wiki-links [[...]]).
 4. Keep all Markdown syntax (bold, italic, lists, links) intact.
 5. The translation should sound natural. Do not translate word-for-word.
 
@@ -62,7 +62,7 @@ Article to translate:
 ${text}
 ---`;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────[...]
 
 function chunkText(text: string, maxChars: number): string[] {
 	const paragraphs = text.split(/\n{2,}/);
@@ -89,7 +89,7 @@ function extractFrontmatter(text: string): { frontmatter: string; body: string }
 	return { frontmatter: '', body: text };
 }
 
-// ─── Plugin ───────────────────────────────────────────────────────────────────
+// ─── Plugin ────────────────────────────────────────────────────────────[...]
 
 export default class BilingualTranslator extends Plugin {
 	settings: TranslatorSettings;
@@ -351,8 +351,8 @@ class TranslatorSettingTab extends PluginSettingTab {
 					.addOption('deepseek', 'Deepseek')
 					.addOption('gemini', 'Gemini')
 					.addOption('minimax', 'Minimax')
-					.addOption('openai', 'Openai compatible')
-					.addOption('microsoft', 'Microsoft translator')
+					.addOption('openai', 'OpenAI compatible')
+					.addOption('microsoft', 'Microsoft Translator')
 					.setValue(this.plugin.settings.engine)
 					.onChange(async (value) => {
 						this.plugin.settings.engine = value as EngineType;
@@ -364,7 +364,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName('Deepseek').setHeading();
 
 		new Setting(containerEl)
-			.setName('Deepseek api key')
+			.setName('Deepseek API key')
 			.addText((text) =>
 				text.setValue(this.plugin.settings.deepseekApiKey).onChange(async (v) => {
 					this.plugin.settings.deepseekApiKey = v.trim();
@@ -375,7 +375,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 			.setName('Deepseek model')
 			.addText((text) =>
 				text
-					.setPlaceholder('Enter model id')
+					.setPlaceholder('Enter model ID')
 					.setValue(this.plugin.settings.deepseekModel)
 					.onChange(async (v) => {
 						this.plugin.settings.deepseekModel = v.trim();
@@ -386,8 +386,8 @@ class TranslatorSettingTab extends PluginSettingTab {
 		if (this.plugin.settings.engine === 'gemini') {
 			new Setting(containerEl).setName('Gemini').setHeading();
 			new Setting(containerEl)
-				.setName('Gemini api key')
-				.setDesc('Enter gemini api key')
+				.setName('Gemini API key')
+				.setDesc('Enter Gemini API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiApiKey).onChange(async (v) => {
 						this.plugin.settings.geminiApiKey = v.trim();
@@ -396,7 +396,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Gemini model')
-				.setDesc('Enter model id')
+				.setDesc('Enter model ID')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiModel).onChange(async (v) => {
 						this.plugin.settings.geminiModel = v.trim();
@@ -408,8 +408,8 @@ class TranslatorSettingTab extends PluginSettingTab {
 		if (this.plugin.settings.engine === 'minimax') {
 			new Setting(containerEl).setName('Minimax').setHeading();
 			new Setting(containerEl)
-				.setName('Minimax api key')
-				.setDesc('Enter minimax api key')
+				.setName('Minimax API key')
+				.setDesc('Enter Minimax API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxApiKey).onChange(async (v) => {
 						this.plugin.settings.minimaxApiKey = v.trim();
@@ -418,7 +418,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Minimax model')
-				.setDesc('Enter model id')
+				.setDesc('Enter model ID')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxModel).onChange(async (v) => {
 						this.plugin.settings.minimaxModel = v.trim();
@@ -428,9 +428,9 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'openai') {
-			new Setting(containerEl).setName('Openai compatible').setHeading();
+			new Setting(containerEl).setName('OpenAI compatible').setHeading();
 			new Setting(containerEl)
-				.setName('Api key')
+				.setName('API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.openaiApiKey).onChange(async (v) => {
 						this.plugin.settings.openaiApiKey = v.trim();
@@ -438,11 +438,11 @@ class TranslatorSettingTab extends PluginSettingTab {
 					})
 				);
 			new Setting(containerEl)
-				.setName('Base url')
-				.setDesc('Custom api endpoint url')
+				.setName('Base URL')
+				.setDesc('Custom API endpoint URL')
 				.addText((text) =>
 					text
-						.setPlaceholder('Enter api base url')
+						.setPlaceholder('Enter API base URL')
 						.setValue(this.plugin.settings.openaiBaseUrl)
 						.onChange(async (v) => {
 							this.plugin.settings.openaiBaseUrl = v.trim();
@@ -453,7 +453,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				.setName('Model name')
 				.addText((text) =>
 					text
-						.setPlaceholder('Enter model id')
+						.setPlaceholder('Enter model ID')
 						.setValue(this.plugin.settings.openaiModel)
 						.onChange(async (v) => {
 							this.plugin.settings.openaiModel = v.trim();
@@ -463,9 +463,9 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'microsoft') {
-			new Setting(containerEl).setName('Microsoft translator').setHeading();
+			new Setting(containerEl).setName('Microsoft Translator').setHeading();
 			new Setting(containerEl)
-				.setName('Api key')
+				.setName('API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.microsoftApiKey).onChange(async (v) => {
 						this.plugin.settings.microsoftApiKey = v.trim();
@@ -474,7 +474,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Region')
-				.setDesc('Enter microsoft translator region')
+				.setDesc('Enter Microsoft Translator region')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.microsoftRegion).onChange(async (v) => {
 						this.plugin.settings.microsoftRegion = v.trim();
