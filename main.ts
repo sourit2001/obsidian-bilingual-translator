@@ -29,10 +29,34 @@ interface TranslatorSettings {
 	chunkSize: number;
 }
 
+interface OpenAICompatibleResponse {
+	choices: Array<{
+		message: {
+			content: string;
+		};
+	}>;
+}
+
+interface GeminiResponse {
+	candidates: Array<{
+		content: {
+			parts: Array<{
+				text: string;
+			}>;
+		};
+	}>;
+}
+
+interface MicrosoftTranslatorResponse {
+	translations: Array<{
+		text: string;
+	}>;
+}
+
 const DEFAULT_SETTINGS: TranslatorSettings = {
 	engine: 'deepseek',
 	deepseekApiKey: '',
-	deepseekModel: 'deepseek-chat',
+	deepseekModel: 'deepseek-v4-flash',
 	openaiApiKey: '',
 	openaiBaseUrl: 'https://api.openai.com/v1',
 	openaiModel: 'gpt-4o-mini',
@@ -92,7 +116,7 @@ function extractFrontmatter(text: string): { frontmatter: string; body: string }
 // ─── Plugin ────────────────────────────────────────────────────────────[...]
 
 export default class BilingualTranslator extends Plugin {
-	settings: TranslatorSettings;
+	settings!: TranslatorSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -125,7 +149,7 @@ export default class BilingualTranslator extends Plugin {
 			if (view) {
 				await this.translateAll(view.editor);
 			} else {
-				new Notice('Please open a markdown note first');
+				new Notice('Please open a Markdown note first');
 			}
 		});
 
@@ -213,9 +237,9 @@ export default class BilingualTranslator extends Plugin {
 		switch (this.settings.engine) {
 			case 'deepseek':
 				return this.callOpenAICompatible(
-					'https://api.deepseek.com/v1/chat/completions',
+					'https://api.deepseek.com/chat/completions',
 					this.settings.deepseekApiKey,
-					this.settings.deepseekModel || 'deepseek-chat',
+					this.settings.deepseekModel || 'deepseek-v4-flash',
 					prompt
 				);
 			case 'openai':
@@ -249,7 +273,7 @@ export default class BilingualTranslator extends Plugin {
 		prompt: string,
 		temperature: number = 0.3
 	): Promise<string> {
-		if (!apiKey) throw new Error(`Api key is missing for ${model}.`);
+		if (!apiKey) throw new Error(`API key is missing for ${model}.`);
 
 		const response = await requestUrl({
 			url,
@@ -267,13 +291,14 @@ export default class BilingualTranslator extends Plugin {
 		});
 
 		if (response.status !== 200) {
-			throw new Error(`Api error ${response.status}: ${JSON.stringify(response.json)}`);
+			throw new Error(`API error ${response.status}: ${JSON.stringify(response.json)}`);
 		}
-		return response.json.choices[0].message.content as string;
+		const data = response.json as unknown as OpenAICompatibleResponse;
+		return data.choices[0].message.content;
 	}
 
 	async callGemini(text: string): Promise<string> {
-		if (!this.settings.geminiApiKey) throw new Error('Gemini api key is missing.');
+		if (!this.settings.geminiApiKey) throw new Error('Gemini API key is missing.');
 		
 		const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.settings.geminiModel}:generateContent?key=${this.settings.geminiApiKey}`;
 		
@@ -291,14 +316,15 @@ export default class BilingualTranslator extends Plugin {
 		});
 
 		if (response.status !== 200) {
-			throw new Error(`Gemini api error ${response.status}: ${JSON.stringify(response.json)}`);
+			throw new Error(`Gemini API error ${response.status}: ${JSON.stringify(response.json)}`);
 		}
 		
-		return response.json.candidates[0].content.parts[0].text;
+		const data = response.json as unknown as GeminiResponse;
+		return data.candidates[0].content.parts[0].text;
 	}
 
 	async callMicrosoftTranslator(text: string): Promise<string> {
-		if (!this.settings.microsoftApiKey) throw new Error('Microsoft api key is missing.');
+		if (!this.settings.microsoftApiKey) throw new Error('Microsoft API key is missing.');
 		const paragraphs = text.split(/\n{2,}/);
 		const results: string[] = [];
 		for (const para of paragraphs) {
@@ -313,15 +339,17 @@ export default class BilingualTranslator extends Plugin {
 				body: JSON.stringify([{ Text: para }]),
 				throw: false,
 			});
-			if (res.status !== 200) throw new Error(`Microsoft api error ${res.status}`);
-			const translated = res.json[0]?.translations[0]?.text ?? '';
+			if (res.status !== 200) throw new Error(`Microsoft API error ${res.status}`);
+			const data = res.json as unknown as MicrosoftTranslatorResponse[];
+			const translated = data[0]?.translations[0]?.text ?? '';
 			results.push(`${para}\n\n${translated}`);
 		}
 		return results.join('\n\n');
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const savedSettings = await this.loadData() as Partial<TranslatorSettings>;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, savedSettings);
 	}
 
 	async saveSettings() {
@@ -352,7 +380,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 					.addOption('gemini', 'Gemini')
 					.addOption('minimax', 'Minimax')
 					.addOption('openai', 'OpenAI compatible')
-					.addOption('microsoft', 'Microsoft Translator')
+					.addOption('microsoft', 'Microsoft translator')
 					.setValue(this.plugin.settings.engine)
 					.onChange(async (value) => {
 						this.plugin.settings.engine = value as EngineType;
@@ -393,7 +421,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 						this.plugin.settings.geminiApiKey = v.trim();
 						await this.plugin.saveSettings();
 					})
-				);
+			);
 			new Setting(containerEl)
 				.setName('Gemini model')
 				.setDesc('Enter model ID')
@@ -409,13 +437,13 @@ class TranslatorSettingTab extends PluginSettingTab {
 			new Setting(containerEl).setName('Minimax').setHeading();
 			new Setting(containerEl)
 				.setName('Minimax API key')
-				.setDesc('Enter Minimax API key')
+				.setDesc('Enter minimax API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.minimaxApiKey).onChange(async (v) => {
 						this.plugin.settings.minimaxApiKey = v.trim();
 						await this.plugin.saveSettings();
 					})
-				);
+			);
 			new Setting(containerEl)
 				.setName('Minimax model')
 				.setDesc('Enter model ID')
@@ -463,7 +491,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'microsoft') {
-			new Setting(containerEl).setName('Microsoft Translator').setHeading();
+			new Setting(containerEl).setName('Microsoft translator').setHeading();
 			new Setting(containerEl)
 				.setName('API key')
 				.addText((text) =>
@@ -474,7 +502,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Region')
-				.setDesc('Enter Microsoft Translator region')
+				.setDesc('Enter Microsoft translator region')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.microsoftRegion).onChange(async (v) => {
 						this.plugin.settings.microsoftRegion = v.trim();
@@ -483,7 +511,6 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 		}
 
-		new Setting(containerEl).setName('Advanced').setHeading();
 		new Setting(containerEl)
 			.setName('Translation chunk size')
 			.setDesc('Maximum characters per translation request')

@@ -5,11 +5,15 @@
   "main": "main.js",
   "scripts": {
     "dev": "esbuild main.ts --bundle --external:obsidian --format=cjs --watch --outfile=main.js",
-    "build": "esbuild main.ts --bundle --external:obsidian --format=cjs --minify --outfile=main.js"
+    "build": "esbuild main.ts --bundle --external:obsidian --format=cjs --minify --outfile=main.js",
+    "lint": "eslint main.ts"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
+    "@typescript-eslint/parser": "^8.59.0",
     "esbuild": "0.17.11",
+    "eslint": "^9.39.4",
+    "eslint-plugin-obsidianmd": "^0.2.4",
     "obsidian": "latest",
     "typescript": "4.9.5"
   }
