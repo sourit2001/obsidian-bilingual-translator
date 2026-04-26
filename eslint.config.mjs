@@ -10,5 +10,15 @@ export default defineConfig([
 			parser: tsparser,
 			parserOptions: { project: "./tsconfig.json" },
 		},
+		rules: {
+			"obsidianmd/ui/sentence-case": [
+				"error",
+				{
+					acronyms: ["API", "URL", "ID"],
+					brands: [],
+					enforceCamelCaseLower: true,
+				},
+			],
+		},
 	},
 ]);

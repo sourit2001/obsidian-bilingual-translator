@@ -149,7 +149,7 @@ export default class BilingualTranslator extends Plugin {
 			if (view) {
 				await this.translateAll(view.editor);
 			} else {
-				new Notice('Please open a Markdown note first');
+				new Notice('Please open a markdown note first');
 			}
 		});
 
@@ -379,7 +379,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 					.addOption('deepseek', 'Deepseek')
 					.addOption('gemini', 'Gemini')
 					.addOption('minimax', 'Minimax')
-					.addOption('openai', 'OpenAI compatible')
+					.addOption('openai', 'Openai compatible')
 					.addOption('microsoft', 'Microsoft translator')
 					.setValue(this.plugin.settings.engine)
 					.onChange(async (value) => {
@@ -415,7 +415,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 			new Setting(containerEl).setName('Gemini').setHeading();
 			new Setting(containerEl)
 				.setName('Gemini API key')
-				.setDesc('Enter Gemini API key')
+				.setDesc('Enter gemini API key')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.geminiApiKey).onChange(async (v) => {
 						this.plugin.settings.geminiApiKey = v.trim();
@@ -456,7 +456,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 		}
 
 		if (this.plugin.settings.engine === 'openai') {
-			new Setting(containerEl).setName('OpenAI compatible').setHeading();
+			new Setting(containerEl).setName('Openai compatible').setHeading();
 			new Setting(containerEl)
 				.setName('API key')
 				.addText((text) =>
@@ -502,7 +502,7 @@ class TranslatorSettingTab extends PluginSettingTab {
 				);
 			new Setting(containerEl)
 				.setName('Region')
-				.setDesc('Enter Microsoft translator region')
+				.setDesc('Enter microsoft translator region')
 				.addText((text) =>
 					text.setValue(this.plugin.settings.microsoftRegion).onChange(async (v) => {
 						this.plugin.settings.microsoftRegion = v.trim();
