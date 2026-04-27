@@ -15,7 +15,7 @@ export default defineConfig([
 				"error",
 				{
 					acronyms: ["API", "URL", "ID"],
-					brands: [],
+					brands: ["Markdown"],
 					enforceCamelCaseLower: true,
 				},
 			],

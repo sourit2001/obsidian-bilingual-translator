@@ -149,7 +149,7 @@ export default class BilingualTranslator extends Plugin {
 			if (view) {
 				await this.translateAll(view.editor);
 			} else {
-				new Notice('Please open a markdown note first');
+				new Notice('Please open a Markdown note first');
 			}
 		});
 
